@@ -12,7 +12,7 @@ final class Email
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new InvalidEmailException();
         }
-        $this->email = $email;
+        $this->email = \mb_strtolower($email);
         $this->domain = explode('@', $email)[1];
     }
 
