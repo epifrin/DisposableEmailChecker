@@ -6,10 +6,13 @@ use Epifrin\DisposableEmailChecker\Cache\ArrayCache;
 use Epifrin\DisposableEmailChecker\Checker\CheckerInterface;
 use Epifrin\DisposableEmailChecker\Checker\DebounceDisposableApiChecker;
 use Epifrin\DisposableEmailChecker\Email\Email;
+use Epifrin\DisposableEmailChecker\Exception\RateLimitException;
 use Psr\SimpleCache\CacheInterface;
 
 final class DisposableEmailChecker implements DisposableEmailCheckerInterface
 {
+    public int $cacheTimeout = 24 * 60 * 60;
+
     /** @var array<string> */
     private array $trustDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'aol.com'];
 
@@ -21,9 +24,6 @@ final class DisposableEmailChecker implements DisposableEmailCheckerInterface
 
     public function isEmailDisposable(string $emailAddress): bool
     {
-        // check for rate limiting
-        //$this->checkRateLimiting();
-
         $email = new Email($emailAddress);
 
         if ($this->isTrustDomain($email->domain())) {
@@ -34,10 +34,8 @@ final class DisposableEmailChecker implements DisposableEmailCheckerInterface
             return $this->getResultFromCache($email->domain());
         }
 
-        // check with Debounce Disposable API
-        $isDisposable = $this->checker->isEmailDisposable($email->email());
-        $this->saveResultToCache($email, $isDisposable);
-        return $isDisposable;
+        // check with Debounce Disposable API or custom checker
+        return $this->check($email);
     }
 
     private function isTrustDomain(string $domain): bool
@@ -48,6 +46,20 @@ final class DisposableEmailChecker implements DisposableEmailCheckerInterface
     private function alreadyFound(string $domain): bool
     {
         return $this->cache->has('domain=' . $domain);
+    }
+
+    private function check(Email $email): bool
+    {
+        $this->checkRateLimiting();
+
+        try {
+            $isDisposable = $this->checker->isEmailDisposable($email->email());
+            $this->saveResultToCache($email, $isDisposable);
+        } catch (RateLimitException $e) {
+            $this->cache->set('rate.limit.reached', true);
+            throw $e;
+        }
+        return $isDisposable;
     }
 
     private function getResultFromCache(string $domain): bool
@@ -66,6 +78,13 @@ final class DisposableEmailChecker implements DisposableEmailCheckerInterface
 
     private function saveResultToCache(Email $email, bool $isDisposable): void
     {
-        $this->cache->set('domain=' . $email->domain(), $isDisposable, 24 * 60 * 60);
+        $this->cache->set('domain=' . $email->domain(), $isDisposable, $this->cacheTimeout);
+    }
+
+    private function checkRateLimiting(): void
+    {
+        if (true === $this->cache->get('rate.limit.reached')) {
+            throw new RateLimitException();
+        }
     }
 }
