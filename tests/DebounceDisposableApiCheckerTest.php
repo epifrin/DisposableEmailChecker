@@ -2,6 +2,7 @@
 
 namespace Epifrin\DisposableEmailChecker\Tests;
 
+use Epifrin\DisposableEmailChecker\Cache\ArrayCache;
 use Epifrin\DisposableEmailChecker\Checker\CheckerInterface;
 use Epifrin\DisposableEmailChecker\Checker\DebounceDisposableApiChecker;
 use Epifrin\DisposableEmailChecker\DisposableEmailChecker;
@@ -34,7 +35,7 @@ class DebounceDisposableApiCheckerTest extends TestCase
             ->method('isEmailDisposable')
             ->willReturn(true);
 
-        $disposableApi = new DisposableEmailChecker($checker);
+        $disposableApi = new DisposableEmailChecker(new ArrayCache(), $checker);
 
         $this->assertTrue($disposableApi->isEmailDisposable($email));
         // this time Debounce Api will not call

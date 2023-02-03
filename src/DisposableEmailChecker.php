@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Epifrin\DisposableEmailChecker;
 
@@ -7,26 +8,27 @@ use Epifrin\DisposableEmailChecker\Checker\CheckerInterface;
 use Epifrin\DisposableEmailChecker\Checker\DebounceDisposableApiChecker;
 use Epifrin\DisposableEmailChecker\Email\Email;
 use Epifrin\DisposableEmailChecker\Exception\RateLimitException;
+use Epifrin\DisposableEmailChecker\TrustDomain\TrustDomain;
 use Psr\SimpleCache\CacheInterface;
 
 final class DisposableEmailChecker implements DisposableEmailCheckerInterface
 {
     public int $cacheTimeout = 24 * 60 * 60;
 
-    /** @var array<string> */
-    private array $trustDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'aol.com'];
+    private TrustDomain $trustDomain;
 
     public function __construct(
-        private readonly CheckerInterface $checker = new DebounceDisposableApiChecker(),
-        private readonly CacheInterface $cache = new ArrayCache()
+        private readonly CacheInterface $cache = new ArrayCache(),
+        private readonly CheckerInterface $checker = new DebounceDisposableApiChecker()
     ) {
+        $this->trustDomain = new TrustDomain();
     }
 
     public function isEmailDisposable(string $emailAddress): bool
     {
         $email = new Email($emailAddress);
 
-        if ($this->isTrustDomain($email->domain())) {
+        if ($this->trustDomain->isTrustDomain($email->domain())) {
             return false;
         }
 
@@ -36,11 +38,6 @@ final class DisposableEmailChecker implements DisposableEmailCheckerInterface
 
         // check with Debounce Disposable API or custom checker
         return $this->check($email);
-    }
-
-    private function isTrustDomain(string $domain): bool
-    {
-        return in_array($domain, $this->trustDomains, true);
     }
 
     private function alreadyFound(string $domain): bool
@@ -72,7 +69,7 @@ final class DisposableEmailChecker implements DisposableEmailCheckerInterface
      */
     public function addTrustDomains(array $trustDomains): self
     {
-        $this->trustDomains = array_merge($this->trustDomains, $trustDomains);
+        $this->trustDomain->addDomains($trustDomains);
         return $this;
     }
 

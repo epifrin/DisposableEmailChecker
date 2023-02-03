@@ -2,61 +2,68 @@
 
 namespace Epifrin\DisposableEmailChecker\Tests;
 
-use Epifrin\DisposableEmailChecker\Checker\CheckerInterface;
-use Epifrin\DisposableEmailChecker\DisposableEmailChecker;
+use Epifrin\DisposableEmailChecker\TrustDomain\InvalidDomainException;
+use Epifrin\DisposableEmailChecker\TrustDomain\TrustDomain;
 use PHPUnit\Framework\TestCase;
 
 class TrustDomainTest extends TestCase
 {
-    public function testTrustDomain(): void
-    {
-        $email = 'test@gmail.com';
-
-        $checkerMock = $this->createMock(CheckerInterface::class);
-        $checkerMock
-            ->expects($this->never())
-            ->method('isEmailDisposable');
-
-        $disposableEmailChecker = new DisposableEmailChecker($checkerMock);
-
-        $this->assertFalse($disposableEmailChecker->isEmailDisposable($email));
-    }
-
     /**
      * @dataProvider domainsProvider
      */
     public function testDomains(string $email, bool $result)
     {
-        $checkerMock = $this->createMock(CheckerInterface::class);
-        $checkerMock
-            ->method('isEmailDisposable')
-            ->willReturn(true);
-        $disposableEmailChecker = new DisposableEmailChecker($checkerMock);
-        $this->assertSame($disposableEmailChecker->isEmailDisposable($email), $result);
+        $trustDomain = new TrustDomain();
+        $this->assertSame($trustDomain->isTrustDomain($email), $result);
     }
 
     public function domainsProvider()
     {
         return [
-            'gmail.com' => ['admin@gmail.com', false],
-            'testgmail.com' => ['admin@testgmail.com', true],
-            'gmail.com.test' => ['admin@gmail.com.test', true],
+            'gmail.com' => ['gmail.com', true],
+            'GMAIL.COM' => ['GMAIL.COM', true],
+            'yahoo.com' => ['yahoo.com', true],
+            'hotmail.com' => ['hotmail.com', true],
+            'aol.com' => ['aol.com', true],
+            'msn.com' => ['msn.com', true],
+            'testgmail.com' => ['testgmail.com', false],
+            'gmail.com.test' => ['gmail.com.test', false],
         ];
     }
 
     public function testAddTrustDomain(): void
     {
-        $email = 'test@domain.com';
+        $domain = 'domain.com';
+        $trustDomain = new TrustDomain();
+        $trustDomain->addDomains([$domain, 'domain2.com']);
+        $this->assertTrue($trustDomain->isTrustDomain($domain));
+    }
 
-        $checkerMock = $this->createMock(CheckerInterface::class);
-        $checkerMock
-            ->expects($this->never())
-            ->method('isEmailDisposable');
+    /**
+     * @dataProvider incorrectDomainsProvider
+     */
+    public function testAddIncorrectDomain($incorrectDomain)
+    {
+        $this->expectException(InvalidDomainException::class);
+        $this->expectExceptionMessage('Domain ' . $incorrectDomain . ' is incorrect');
+        $trustDomain = new TrustDomain();
+        $trustDomain->addDomains(['domain.com', $incorrectDomain]);
+    }
 
-        $disposableEmailChecker = new DisposableEmailChecker($checkerMock);
+    public function incorrectDomainsProvider()
+    {
+        return [
+            'incorrect' => ['incorrect'],
+            '12312312' => ['12312312'],
+            '...' => ['...'],
+        ];
+    }
 
-        $disposableEmailChecker->addTrustDomains(['domain.com']);
-
-        $this->assertFalse($disposableEmailChecker->isEmailDisposable($email));
+    public function testAddIncorrectStringDomain()
+    {
+        $this->expectException(InvalidDomainException::class);
+        $this->expectExceptionMessage('Domain is incorrect');
+        $trustDomain = new TrustDomain();
+        $trustDomain->addDomains([[]]);
     }
 }
