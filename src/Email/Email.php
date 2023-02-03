@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Epifrin\DisposableEmailChecker\Email;
 
 final class Email

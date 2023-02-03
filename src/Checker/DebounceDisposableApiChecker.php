@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Epifrin\DisposableEmailChecker\Checker;
 
 use Epifrin\DisposableEmailChecker\Exception\RateLimitException;

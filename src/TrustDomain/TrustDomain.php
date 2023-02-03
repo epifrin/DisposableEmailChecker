@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Epifrin\DisposableEmailChecker\TrustDomain;
@@ -19,7 +20,7 @@ class TrustDomain
     public function addDomains(array $trustDomains): void
     {
         foreach ($trustDomains as &$domain) {
-            if (false === is_string($domain)) {
+            if (!is_string($domain)) {
                 throw new InvalidDomainException('Domain is incorrect');
             }
             $domain = \mb_strtolower($domain);
