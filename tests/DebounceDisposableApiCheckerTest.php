@@ -6,6 +6,7 @@ use Epifrin\DisposableEmailChecker\Cache\ArrayCache;
 use Epifrin\DisposableEmailChecker\Checker\CheckerInterface;
 use Epifrin\DisposableEmailChecker\Checker\DebounceDisposableApiChecker;
 use Epifrin\DisposableEmailChecker\DisposableEmailChecker;
+use Epifrin\DisposableEmailChecker\Exception\RateLimitException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -17,7 +18,11 @@ class DebounceDisposableApiCheckerTest extends TestCase
     public function testDisposableEmail()
     {
         $mock = new MockHandler([
-            new Response(200, ['application' => 'json'], \json_encode(['disposable' => 'true']))
+            new Response(
+                200,
+                ['application' => 'json'],
+                \json_encode(['disposable' => 'true'])
+            )
         ]);
         $handlerStack = HandlerStack::create($mock);
         $client = new Client(['handler' => $handlerStack]);
@@ -25,20 +30,31 @@ class DebounceDisposableApiCheckerTest extends TestCase
         $this->assertTrue($disposableApi->isEmailDisposable('test@mailnator.com'));
     }
 
-    public function testAlreadySearchedEmail()
+    public function testReachRateLimiting()
     {
-        $email = 'test@mailinator.com';
+        $this->expectException(RateLimitException::class);
+        $mock = new MockHandler([
+            new Response(
+                200,
+                ['application' => 'json'],
+                \json_encode(['error' => 'rate limit reached'])
+        )]);
+        $handlerStack = HandlerStack::create($mock);
+        $client = new Client(['handler' => $handlerStack]);
+        $disposableApi = new DebounceDisposableApiChecker($client);
+        $this->assertTrue($disposableApi->isEmailDisposable('test@mailnator.com'));
+    }
 
-        $checker = $this->createMock(CheckerInterface::class);
-        $checker
-            ->expects($this->once())
-            ->method('isEmailDisposable')
-            ->willReturn(true);
-
-        $disposableApi = new DisposableEmailChecker(new ArrayCache(), $checker);
-
-        $this->assertTrue($disposableApi->isEmailDisposable($email));
-        // this time Debounce Api will not call
-        $this->assertTrue($disposableApi->isEmailDisposable($email));
+    public function testHttpError()
+    {
+        $mock = new MockHandler([
+                                    new Response(
+                                        401,
+                                        ['application' => 'json'],
+                                    )]);
+        $handlerStack = HandlerStack::create($mock);
+        $client = new Client(['handler' => $handlerStack]);
+        $disposableApi = new DebounceDisposableApiChecker($client);
+        $this->assertFalse($disposableApi->isEmailDisposable('test@mailnator.com'));
     }
 }

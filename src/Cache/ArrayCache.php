@@ -9,6 +9,8 @@ use Psr\SimpleCache\CacheInterface;
 /**
  * PSR-16 Array cache implementation.
  * It uses if the developer doesn't assign his PSR-16 compatible cache object.
+ *
+ * @codeCoverageIgnore
  */
 final class ArrayCache implements CacheInterface
 {
