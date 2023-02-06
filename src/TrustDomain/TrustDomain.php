@@ -7,7 +7,7 @@ namespace Epifrin\DisposableEmailChecker\TrustDomain;
 class TrustDomain
 {
     /** @var array<string> */
-    private array $trustDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'aol.com', 'msn.com'];
+    private array $trustDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'aol.com', 'msn.com', 'icloud.com', 'zoho.com', 'mail.com'];
 
     public function isTrustDomain(string $domain): bool
     {

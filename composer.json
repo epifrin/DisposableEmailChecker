@@ -1,5 +1,6 @@
 {
     "name": "epifrin/disposable-email-checker",
+    "description": "The library allows checking if the email address is disposable",
     "type": "library",
     "authors": [
         {
