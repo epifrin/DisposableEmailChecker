@@ -3,7 +3,7 @@ The library allows checking if the email address is disposable.
 
 ## How it works
 
-The library utilizes a third-party Debounce Disposable Email API, by sending requests and receiving responses. 
+The library utilizes a third-party [Debounce Disposable Email API](https://debounce.io/free-disposable-check-api/), by sending requests and receiving responses. 
 While the API is free to use, there are restrictions on the number of requests allowed. 
 To minimize the number of requests, the library maintains its list of well-known email domains and implements a caching mechanism for previous responses.
 
