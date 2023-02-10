@@ -2,10 +2,7 @@
 
 namespace Epifrin\DisposableEmailChecker\Tests;
 
-use Epifrin\DisposableEmailChecker\Cache\ArrayCache;
-use Epifrin\DisposableEmailChecker\Checker\CheckerInterface;
 use Epifrin\DisposableEmailChecker\Checker\DebounceDisposableApiChecker;
-use Epifrin\DisposableEmailChecker\DisposableEmailChecker;
 use Epifrin\DisposableEmailChecker\Exception\RateLimitException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;

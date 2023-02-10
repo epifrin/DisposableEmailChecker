@@ -28,6 +28,11 @@
             "Epifrin\\DisposableEmailChecker\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Epifrin\\DisposableEmailChecker\\Test\\": "tests/"
+        }
+    },
     "scripts": {
         "test": "phpunit tests",
         "coverage": "phpunit tests --coverage-html .phpunit.cache/code-coverage",
