@@ -1,6 +1,12 @@
 # Disposable Email Checker
 The library allows checking if the email address is disposable.
 
+[![Build status](https://github.com/epifrin/DisposableEmailChecker/actions/workflows/build.yml/badge.svg)](https://github.com/epifrin/DisposableEmailChecker/actions/workflows/build.yml)
+[![Latest Stable Version](http://poser.pugx.org/epifrin/disposable-email-checker/v)](https://packagist.org/packages/epifrin/disposable-email-checker)
+[![PHP Version Require](http://poser.pugx.org/epifrin/disposable-email-checker/require/php)](https://packagist.org/packages/epifrin/disposable-email-checker)
+[![Total Downloads](http://poser.pugx.org/epifrin/disposable-email-checker/downloads)](https://packagist.org/packages/epifrin/disposable-email-checker)
+[![License](http://poser.pugx.org/epifrin/disposable-email-checker/license)](https://packagist.org/packages/epifrin/disposable-email-checker) 
+
 ## How it works
 
 The library utilizes a third-party [Debounce Disposable Email API](https://debounce.io/free-disposable-check-api/), by sending requests and receiving responses. 
@@ -9,9 +15,9 @@ To minimize the number of requests, the library maintains its list of well-known
 
 ## Requirements
 
-PHP ^8.1
+`PHP ^8.1`
 
-guzzlehttp/guzzle ^7.0
+`guzzlehttp/guzzle ^7.0`
 
 ## Installation
 
