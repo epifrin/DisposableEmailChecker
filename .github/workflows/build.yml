@@ -1,4 +1,4 @@
-name: PHP Composer
+name: Build
 
 on:
   push:
@@ -21,16 +21,7 @@ jobs:
       run: composer validate --strict
       
     - name: Determine composer cache directory on Linux.
-      run: echo "COMPOSER_CACHE_DIR=$(composer config cache-dir)" >> $GITHUB_ENV  
-
-    #- name: Cache Composer packages
-    #  id: composer-cache
-    #  uses: actions/cache@v3
-    #  with:
-    #    path: vendor
-    #    key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-    #    restore-keys: |
-    #      ${{ runner.os }}-php-
+      run: echo "COMPOSER_CACHE_DIR=$(composer config cache-dir)" >> $GITHUB_ENV
 
     - name: Install dependencies
       run: composer update  --prefer-dist --no-interaction --no-progress --optimize-autoloader
@@ -38,5 +29,5 @@ jobs:
     # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
     # Docs: https://getcomposer.org/doc/articles/scripts.md
 
-    # - name: Run test suite
-    #   run: composer run-script test
+    - name: Run test suite
+      run: composer run-script test
